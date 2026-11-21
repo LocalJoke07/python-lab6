@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 import httpx
 
@@ -18,7 +19,7 @@ class StorageHttpClient:
     def close(self) -> None:
         self._client.close()
 
-    def _request(self, method: str, path: str, **kwargs: object) -> httpx.Response:
+    def _request(self, method: str, path: str, **kwargs: Any) -> httpx.Response:
         try:
             response = self._client.request(method, path, **kwargs)
             response.raise_for_status()
@@ -36,7 +37,7 @@ class StorageHttpClient:
             raise NeighborUnavailableError("storage service unavailable") from exc
 
     @staticmethod
-    def _parse_item(data: dict[str, object]) -> Item:
+    def _parse_item(data: dict[str, Any]) -> Item:
         return Item(
             id=int(data["id"]),
             name=str(data["name"]),
