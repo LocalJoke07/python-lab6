@@ -1,0 +1,5 @@
+-r api_gateway/requirements.txt
+-r storage_service/requirements.txt
+pytest==9.0.2
+ruff==0.17.6
+mypy==2.4.1

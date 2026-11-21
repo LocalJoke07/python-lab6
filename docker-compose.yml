@@ -1,0 +1,72 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+  storage-service:
+    image: python-lab6-storage:latest
+    restart: on-failure
+    build:
+      context: ./storage_service
+      dockerfile: Dockerfile
+    environment:
+      APP_HOST: 0.0.0.0
+      APP_PORT: 8001
+      APP_DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      APP_LOG_LEVEL: ${APP_LOG_LEVEL:-INFO}
+    ports:
+      - "${STORAGE_PORT:-8001}:8001"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8001/health', timeout=2)"
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+  api-gateway:
+    image: python-lab6-gateway:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      APP_HOST: 0.0.0.0
+      APP_PORT: 8000
+      APP_STORAGE_BASE_URL: http://storage-service:8001
+      APP_STORAGE_TIMEOUT_S: ${APP_STORAGE_TIMEOUT_S:-2.0}
+      APP_LOG_LEVEL: ${APP_LOG_LEVEL:-INFO}
+    ports:
+      - "${GATEWAY_PORT:-8000}:8000"
+    depends_on:
+      storage-service:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2)"
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+volumes:
+  pgdata:

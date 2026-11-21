@@ -1,0 +1,46 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Create clean venv and install dependencies
+        run: |
+          python3 -m venv .venv
+          .venv/bin/python -m pip install --upgrade pip
+          .venv/bin/pip install -r requirements-dev.txt
+
+      - name: Ruff
+        run: .venv/bin/ruff check .
+
+      - name: Mypy api-gateway
+        run: cd api_gateway && ../.venv/bin/mypy app tests
+
+      - name: Mypy storage-service
+        run: cd storage_service && ../.venv/bin/mypy app tests
+
+      - name: Pytest api-gateway
+        run: cd api_gateway && ../.venv/bin/pytest -q
+
+      - name: Pytest storage-service
+        run: cd storage_service && ../.venv/bin/pytest -q
+
+      - name: Docker build api-gateway
+        run: docker build -t python-lab6-gateway .
+
+      - name: Docker build storage-service
+        run: docker build -t python-lab6-storage ./storage_service

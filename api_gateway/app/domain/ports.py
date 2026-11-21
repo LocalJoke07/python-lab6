@@ -1,0 +1,13 @@
+from typing import Protocol
+
+from app.domain.models import Item, ItemDraft
+
+
+class ItemStoragePort(Protocol):
+    def create_item(self, draft: ItemDraft) -> Item: ...
+
+    def get_item(self, item_id: int) -> Item: ...
+
+    def health(self) -> bool: ...
+
+    def close(self) -> None: ...

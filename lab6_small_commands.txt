@@ -1,0 +1,52 @@
+ЛР6 — УМЕНЬШЕННАЯ ВЕРСИЯ STORAGE
+
+Новая папка проекта:
+~/Загрузки/python-lab6-small
+
+1. Распаковать архив в Загрузки.
+
+2. Перейти в НОВЫЙ проект:
+
+cd ~/Загрузки/python-lab6-small
+
+3. Создать .env:
+
+cp .env.example .env
+
+4. Остановить контейнеры старого проекта, если они еще работают:
+
+docker compose -p python-lab6 down 2>/dev/null || true
+
+5. Пересобрать новые образы без кэша:
+
+docker compose build --no-cache
+
+6. Запустить:
+
+docker compose up -d
+
+7. Проверить контейнеры:
+
+docker compose ps
+
+8. Проверить размеры:
+
+docker images | grep python-lab6
+
+Нужно:
+gateway < 200 MB
+storage < 200 MB
+
+9. Проверить health:
+
+curl "http://127.0.0.1:8000/health"
+
+10. Проверить создание:
+
+curl -X POST "http://127.0.0.1:8000/items" \
+-H "Content-Type: application/json" \
+-d '{"name":"CPU","price":199,"quantity":3}'
+
+11. Проверить чтение (подставить id из ответа POST):
+
+curl "http://127.0.0.1:8000/items/1"

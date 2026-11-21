@@ -1,0 +1,45 @@
+LAB 6 - COMMANDS
+
+1. Open project:
+cd ~/Загрузки/python-lab6
+
+2. Create real env file:
+cp .env.example .env
+
+3. Start everything:
+docker compose up --build
+
+4. In another terminal, check health:
+docker compose ps
+curl -f http://127.0.0.1:8000/health
+curl -f http://127.0.0.1:8001/health
+
+5. Open Swagger:
+http://127.0.0.1:8000/docs
+
+6. Create item:
+curl -X POST http://127.0.0.1:8000/items -H 'Content-Type: application/json' -d '{"name":"CPU","price":199,"quantity":3}'
+
+7. Read item:
+curl http://127.0.0.1:8000/items/1
+
+8. Show non-root user:
+docker compose exec api-gateway whoami
+docker compose exec storage-service whoami
+
+Expected:
+app
+app
+
+9. Show image sizes:
+docker images python-lab6-gateway python-lab6-storage
+
+10. Stop containers without deleting DB volume:
+docker compose down
+
+11. Start again and verify item is still stored:
+docker compose up -d
+curl http://127.0.0.1:8000/items/1
+
+12. Remove containers AND database data only when needed:
+docker compose down -v
