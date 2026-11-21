@@ -5,7 +5,6 @@ from app.domain.errors import ItemNotFoundError, NeighborUnavailableError
 from app.domain.models import ItemDraft
 from app.domain.services import CatalogService
 
-
 router = APIRouter()
 
 

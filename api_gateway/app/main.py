@@ -1,14 +1,13 @@
-from contextlib import asynccontextmanager
 import logging
+from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
 import uvicorn
+from fastapi import FastAPI
 
 from app.api.routes import router
 from app.config import get_settings
 from app.domain.services import CatalogService
 from app.storage.storage_client import StorageHttpClient
-
 
 settings = get_settings()
 logging.basicConfig(

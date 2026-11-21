@@ -2,7 +2,6 @@ import os
 
 import httpx
 
-
 base_url = os.environ["GATEWAY_BASE_URL"]
 
 with httpx.Client(base_url=base_url, timeout=5.0) as client:

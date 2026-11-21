@@ -5,7 +5,6 @@ import httpx
 from app.domain.errors import ItemNotFoundError, NeighborUnavailableError
 from app.domain.models import Item, ItemDraft
 
-
 logger = logging.getLogger(__name__)
 
 

@@ -1,13 +1,12 @@
 import logging
 
-from fastapi import FastAPI
 import uvicorn
+from fastapi import FastAPI
 
 from app.api.routes import router
 from app.config import get_settings
 from app.domain.services import ItemService
 from app.storage.repository import PostgresItemRepository
-
 
 settings = get_settings()
 logging.basicConfig(

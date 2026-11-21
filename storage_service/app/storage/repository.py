@@ -1,12 +1,11 @@
 import logging
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 import psycopg
 
 from app.domain.models import Item, ItemDraft
-
 
 logger = logging.getLogger(__name__)
 
@@ -41,10 +40,9 @@ class PostgresItemRepository:
                 time.sleep(1)
 
     def _initialize(self) -> None:
-        with self._connect() as connection:
-            with connection.cursor() as cursor:
-                cursor.execute(
-                    """
+        with self._connect() as connection, connection.cursor() as cursor:
+            cursor.execute(
+                """
                     CREATE TABLE IF NOT EXISTS items (
                         id BIGSERIAL PRIMARY KEY,
                         name VARCHAR(64) NOT NULL,
@@ -53,12 +51,12 @@ class PostgresItemRepository:
                         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
                     )
                     """
-                )
+            )
 
     @staticmethod
     def _created_at_to_text(value: object) -> str:
         if isinstance(value, datetime):
-            normalized = value.astimezone(timezone.utc).isoformat()
+            normalized = value.astimezone(UTC).isoformat()
             return normalized.replace("+00:00", "Z")
         return str(value)
 
@@ -73,34 +71,32 @@ class PostgresItemRepository:
         )
 
     def create(self, draft: ItemDraft) -> Item:
-        with self._connect() as connection:
-            with connection.cursor() as cursor:
-                cursor.execute(
-                    """
+        with self._connect() as connection, connection.cursor() as cursor:
+            cursor.execute(
+                """
                     INSERT INTO items (name, price, quantity)
                     VALUES (%s, %s, %s)
                     RETURNING id, name, price, quantity, created_at
                     """,
-                    (draft.name, draft.price, draft.quantity),
-                )
-                row = cursor.fetchone()
+                (draft.name, draft.price, draft.quantity),
+            )
+            row = cursor.fetchone()
 
         if row is None:
             raise RuntimeError("failed to create item")
         return self._from_row(row)
 
     def get(self, item_id: int) -> Item | None:
-        with self._connect() as connection:
-            with connection.cursor() as cursor:
-                cursor.execute(
-                    """
+        with self._connect() as connection, connection.cursor() as cursor:
+            cursor.execute(
+                """
                     SELECT id, name, price, quantity, created_at
                     FROM items
                     WHERE id = %s
                     """,
-                    (item_id,),
-                )
-                row = cursor.fetchone()
+                (item_id,),
+            )
+            row = cursor.fetchone()
 
         if row is None:
             return None
@@ -108,8 +104,7 @@ class PostgresItemRepository:
 
     def ping(self) -> bool:
         try:
-            with self._connect() as connection:
-                with connection.cursor() as cursor:
+            with self._connect() as connection, connection.cursor() as cursor:
                     cursor.execute("SELECT 1")
                     return cursor.fetchone() is not None
         except psycopg.Error:
