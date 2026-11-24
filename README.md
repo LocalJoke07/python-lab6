@@ -166,3 +166,5 @@ Any failed command fails the job.
 ```bash
 docker compose down
 ```
+
+CI check: application is ready.
